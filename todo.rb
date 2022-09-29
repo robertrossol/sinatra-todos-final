@@ -17,19 +17,11 @@ end
 
 helpers do
   def list_complete?(list)
-    todos_count(list).positive? && todos_remaining_count(list).zero?
+    list[:todos_count].positive? && list[:todos_remaining_count].zero?
   end
 
   def list_class(list)
     "complete" if list_complete?(list)
-  end
-
-  def todos_count(list)
-    list[:todos].size
-  end
-
-  def todos_remaining_count(list)
-    list[:todos].count { |todo| !todo[:completed] }
   end
 
   def sort_lists(lists, &block)
@@ -113,6 +105,7 @@ end
 get "/lists/:id" do
   @list_id = params[:id].to_i
   @list = load_list(@list_id)
+  @todos = @storage.find_todos_for_list(@list_id)
   erb :list, layout: :layout
 end
 
@@ -158,6 +151,7 @@ end
 post "/lists/:list_id/todos" do
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
+  @todos = @storage.find_todos_for_list(@list_id)
   text = params[:todo].strip
 
   error = error_for_todo(text)
